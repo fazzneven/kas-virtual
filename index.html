@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kas Virtual - Manajemen Keuangan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-wallet text-2xl text-blue-600"></i>
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Kas Virtual</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+<button id="themeToggle" aria-label="Toggle theme" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+                    </button>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Total Saldo</p>
+                        <p class="text-xl font-bold text-green-600 dark:text-green-400" id="totalBalance">Rp 0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Dashboard Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Pemasukan Bulan Ini</p>
+                        <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="totalIncome">Rp 0</p>
+                    </div>
+                    <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                        <i class="fas fa-arrow-up text-green-600 dark:text-green-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Pengeluaran Bulan Ini</p>
+                        <p class="text-2xl font-bold text-red-600 dark:text-red-400" id="totalExpense">Rp 0</p>
+                    </div>
+                    <div class="p-3 bg-red-100 dark:bg-red-900 rounded-full">
+                        <i class="fas fa-arrow-down text-red-600 dark:text-red-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Total Transaksi</p>
+                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="totalTransactions">0</p>
+                    </div>
+                    <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                        <i class="fas fa-exchange-alt text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Grafik Keuangan</h3>
+                    <select id="financeTimeRange" class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white px-2 py-1">
+                        <option value="7">7 Hari</option>
+                        <option value="30">30 Hari</option>
+                        <option value="90">90 Hari</option>
+                    </select>
+                </div>
+                <div id="financeChartContainer" class="relative h-64">
+                    <canvas id="financeChart" width="400" height="200"></canvas>
+                    <div id="financeEmptyState" class="hidden absolute inset-0 flex items-center justify-center">
+                        <div class="text-center text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-chart-line text-4xl mb-2 opacity-50"></i>
+                            <p>Belum ada data transaksi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Kategori Transaksi</h3>
+                    <div class="flex space-x-2">
+                        <button id="categoryToggleIncome" class="text-sm px-3 py-1 rounded-lg bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">Pemasukan</button>
+                        <button id="categoryToggleExpense" class="text-sm px-3 py-1 rounded-lg bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300">Pengeluaran</button>
+                    </div>
+                </div>
+                <div id="categoryChartContainer" class="relative h-64">
+                    <canvas id="categoryChart" width="400" height="200"></canvas>
+                    <div id="categoryEmptyState" class="hidden absolute inset-0 flex items-center justify-center">
+                        <div class="text-center text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-chart-pie text-4xl mb-2 opacity-50"></i>
+                            <p id="categoryEmptyMessage">Belum ada data pengeluaran</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Form -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Tambah Transaksi</h3>
+            <form id="transactionForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Jenis Transaksi</label>
+<select id="transactionType" aria-label="Jenis Transaksi" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                            <option value="income">Pemasukan</option>
+                            <option value="expense">Pengeluaran</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kategori</label>
+<select id="category" aria-label="Kategori" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+<label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Jumlah</label>
+<input type="number" id="amount" placeholder="Masukkan jumlah" min="0" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                    </div>
+                    
+                    <div>
+<label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tanggal</label>
+<input type="date" id="date" placeholder="Pilih tanggal" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Deskripsi</label>
+<textarea id="description" rows="2" placeholder="Masukkan deskripsi transaksi..." class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                    <i class="fas fa-plus mr-2"></i>Tambah Transaksi
+                </button>
+            </form>
+        </div>
+
+        <!-- Transaction List -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Riwayat Transaksi</h3>
+                    <div class="flex space-x-2">
+                        <button id="exportBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition">
+                            <i class="fas fa-download mr-2"></i>Export
+                        </button>
+                        <button id="clearAllBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+                            <i class="fas fa-trash mr-2"></i>Hapus Semua
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Deskripsi</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kategori</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jumlah</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionList" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <!-- Transactions will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <p class="text-center text-gray-600 dark:text-gray-300">
+                <i class="fas fa-heart text-red-500"></i> Kas Virtual - Kelola keuanganmu dengan mudah
+            </p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
